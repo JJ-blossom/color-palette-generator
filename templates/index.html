@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link
+            rel="stylesheet" href="{{ url_for('static', filename='css/styles.css')}}" />
+</head>
+
+<body>
+<h1>PEONY'S PALETTES</h1>
+
+<div class="container">
+    <form method="POST" action="{{ url_for('home') }}" enctype="multipart/form-data">
+        <label for="file-input" id="form_label">Select an image to generate your colour palette</label>
+        <br />
+        <br />
+        <div>
+            <input id="file-input" name="file-input" type="file" accept="image/jpg, image/png, image/jpeg" required />
+            <label for="number">Colours: </label>
+            <input id="number" name="number" type="number" min="4" value="4" maxlength="5" required/>
+            <button type="submit" id="submitButton">GET PALETTE</button>
+        </div>
+        <textarea hidden="hidden" id="url" name="url"></textarea>
+        <input hidden="hidden" id="path" name="path" />
+    </form>
+</div>
+{% if colors or error %}
+    <div class="container">
+{% else %}
+    <div class="container" id="palette_container" hidden>
+{% endif %}
+    <div class="inline">
+        <img id="preview-image" src="" alt="selected image" hidden />
+        {% if error %}
+        <h2 style="color: red">{{ error }}</h2>
+        {% endif %}
+
+        {% if colors %}
+        <img id="image" src="/static/images/test.{{ path }}" alt="selected image"  />
+        <div id="color-palette">
+            {% for c in colors %}
+            <div class="color-box" style="background-color: {{ colors[c] }}">
+                <p style="color: white">{{ colors[c] }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+</div>
+<script>
+    const fileInput = document.getElementById('file-input');
+    const previewImage = document.getElementById('preview-image');
+    const colorPalette = document.getElementById('color-palette');
+    const submitButton = document.getElementById('submitButton');
+    const image = document.getElementById('image');
+    const path = document.getElementById('path');
+    let file
+
+    fileInput.addEventListener('change', async event => {
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+            file = reader.result;
+            document.getElementById('url').value = file;
+            image.hidden = "hidden";
+            colorPalette.hidden = "hidden";
+        });
+
+        if (event.target.files.length > 0) {
+            reader.readAsDataURL(event.target.files[0]);
+            previewImage.src = URL.createObjectURL(event.target.files[0],);
+            previewImage.removeAttribute('hidden');
+            document.getElementById('palette_container').removeAttribute('hidden');
+            path.value = fileInput.value;
+        }
+    });
+
+    submitButton.addEventListener('click', function () {
+        submitButton.innerText = '...LOADING...';
+    });
+</script>
+</body>
+</html>
+
